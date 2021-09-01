@@ -7,6 +7,10 @@
 
 # User-specific files
 .Ruserdata
+*.pem
+*.log
+*.txt
+*.R
 
 # Example code in package build process
 *-Ex.R
@@ -19,6 +23,7 @@
 
 # RStudio files
 .Rproj.user/
+rsconnect/
 
 # produced vignettes
 vignettes/*.html
@@ -37,3 +42,13 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+
+# Data files
+*.csv
+*.geojson
+
+# img
+*.ico
+*.png
+*.jpg
