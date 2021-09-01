@@ -1,0 +1,138 @@
+---
+title: "Visitor Center Dashboard Report"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+    - { title: "PDNPA", href: "https://www.peakdistrict.gov.uk/", align: right }
+    vertical_layout: scroll
+    orientation: rows
+    css: styles.css
+    theme: cosmo
+    logo: millstone_icon_green.png
+    favicon: logo.ico
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(scales)
+```
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+vn <- readr::read_csv("vn.csv")
+sales <- readr::read_csv("sales.csv")
+ytds <- readr::read_csv("ytds.csv")
+ytdn <- readr::read_csv("ytdn.csv")
+impacts <- readr::read_csv("impacts.csv")
+```
+
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+ selectInput("center", label = h3("Select Visitor Center"), 
+    choices = list("All Centers", "Bakewell", "Castleton", "Edale", "Upper Derwent"), 
+    selected = "All Centres")
+```
+
+<blockquote class="blockquote-reverse">
+  <p>The Peak District Visitor Center Dashboard is an interactive dashboard for long term trend of Visitor Centers owned by the PDNPA.</p>
+  <small>Strategy and Performance Team <cite title="Research"></cite></small>
+</blockquote>
+
+
+Row
+-----------------------------------------------------------------------
+
+### Visitor number per annum
+
+```{r}
+# stacked bar plot
+
+plot1 <- reactive(
+  vn %>% 
+    {if (input$center == "All Centres") {.} 
+      else {filter(., Center == input$center)}} %>% 
+  ggplot() +
+  aes(FY, Visitors, fill = Center) %>%
+  geom_bar(stat = "identity", position = "dodge", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90))
+  )
+
+renderPlot(plot1() + ylim(0,600000) + scale_y_continuous(labels = comma)  + theme(legend.position="bottom"))
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Sales per annum
+
+```{r}
+# stacked bar plot
+
+plot2 <- reactive(
+  sales %>% 
+    {if (input$center == "All Centres") {.} 
+      else {filter(., Center == input$center)}} %>% 
+  ggplot() +
+  aes(FY, Sales, fill = Center) %>%
+  geom_bar(stat = "identity", position = "dodge", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90))
+  )
+
+renderPlot(plot2() + ylim(0,600000) + scale_y_continuous(labels = dollar_format(prefix = "£")) + theme(legend.position="bottom"))
+```
+
+Row {.tabset}
+-----------------------------------------------------------------------
+
+### Year to date visitor numbers
+
+```{r}
+# stacked bar plot
+plot3 <- reactive(
+  ytdn %>% 
+    {if (input$center == "All Centres") {.} 
+      else {filter(., Center == input$center)}} %>% 
+  ggplot() +
+  aes(factor(Month,levels=month.name), Visitors, fill = Center) %>%
+  geom_bar(stat = "identity", position = "dodge", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90))
+  )
+
+renderPlot(plot3() + labs(x = "Month") + theme(legend.position="bottom"))
+```
+
+### Year to date Sales
+
+```{r}
+# stacked bar plot
+
+plot4 <- reactive(
+  ytds %>% 
+    {if (input$center == "All Centres") {.} 
+      else {filter(., Center == input$center)}} %>% 
+  ggplot() +
+  aes(factor(Month,levels=month.name), Sales, fill = Center) %>%
+  geom_bar(stat = "identity", position = "dodge", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90))
+  )
+
+renderPlot(plot4() + labs(x = "Month") + scale_y_continuous(labels = dollar_format(prefix = "£")) + theme(legend.position="bottom"))
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Impacts
+
+```{r}
+# stacked bar plot
+knitr::kable(impacts)
+```
